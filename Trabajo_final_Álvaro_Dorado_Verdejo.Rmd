@@ -1,0 +1,203 @@
+---
+title: "**Trabajo Final**"
+author: "Álvaro Dorado Verdejo"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    theme: dark
+    highlight: tango
+
+---
+
+___
+
+## **1- Expresiones regulares**
+
+_En esta sección se comentan dos páginas con recursos de expresiones regulares._
+
+La primera de ellas es la oficial de [**CRAN**](https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html). Esta **primera** página comienza con una introducción que indica que no es un tutorial, más bien una guía práctica con ejemplos. Empieza con *str_extract*, ejemplificando su funcionamiento y los distintos parámetros, como el uso de *regex*. Tras *str_extract* llega *str_detect*. Al igual que el anterior pone varios ejemplos. Sigue con el uso de *\\* , con bastantes ejemplos sobre cómo *"escapar"* para encontrar, por ejemplo, un *"."*. 
+
+Después, propociona ejemplos de más expresiones regulares para localizar todos los dígitos (*d*) o lo contrario, todo menos los dígitos (*D*), los espacios en blanco (*s*), etc. Tras esto, explica cómo poder *"alternar"* entre dos patrones con *|* y cómo indicar que la cadena deba empezar (*^*) o terminar (*$*) por ese patrón. 
+
+Para finalizar, se explican los patrones de repetición, como *+* o *?*, cómo incluir comentarios o crear patrones más complejos. 
+
+La **segunda** página, *R for Data Science* (<https://r4ds.had.co.nz/strings.html>), se parece mucho más a un *"tutorial"*. Sin ir directamente a ejemplos, comienza explicando qué es un *string* y qué librerías hay que importar para empezar a trabajar con patrones *regex*. La página está mucho más enfocada a explicar todo a un público con poca (o muy poca) experiencia en R y en programación en general. Tras introducir varias funciones *str_*, propone unos ejercicios, tras los cuales empieza el apartado de expresiones regulares.
+
+A partir de aquí, empieza a explicar las mismas funciones que la otra página, con más texto para hacer su comprensión más sencilla. Tras cada apartado propone unos ejercicios que ponen en práctica lo visto anteriormente. Ofrece ejemplos de más funciones que la página anterior, con funciones como *str_match*, *str_extract_all* o *str_replace* todas ellas explicadas y ejemplificadas.
+
+En definitiva, el uso de una u otra página dependerá del nivel del usuario y de qué esté buscando. Si eres un usuario avanzado, es más *directo* e intuitivo encontrar lo que buscas en la **primera** página y en caso de no encontrarlo, ir a la segunda, que contiene más expresiones. Por el contrario, si eres un usuario que se está iniciando, la **segunda** página permite ir paso a paso asentando los diferentes conceptos y poniéndolos en práctica, permitiendo al usuario aprender hasta donde desee.
+
+___
+
+## **2- MarkDown**
+
+_En esta sección se comentan dos páginas con recursos de RMarkDown._ 
+
+La **primera página** es [markdown.es](https://markdown.es/sintaxis-markdown/) presenta un tutorial desde el principio, con el contenido muy estructurado y un índice de contenidos que facilita encontrar lo que se busca. Además del texto, en el vídeo inicial se explica también el contenido de la página. Está dividida en secciones y de cada una pone diferentes ejemplos, es decir, cómo se escribiría en markdown y cómo quedaría. Además, al ser un sitio web dedicado a markdown nos ofrece acceso a más recursos y otros artículos relacionados con markdown (por ejemplo, [Multimarkdown](https://markdown.es/multimarkdown/)). 
+
+La **segunda página** es [IONOS](https://www.ionos.es/digitalguide/paginas-web/desarrollo-web/tutorial-de-markdown/). Esta página presenta, también, la sintaxis de markdown, pero sólo presenta cómo queda escrito en markdown y no el resultado como hacía la primera página. Por otra parte, en el artículo se exponen algunas expresiones que no están en la **primera** página, pero que se pueden encontrar navegando por los diferentes artículos.
+
+En general, la primera página es más amigable y presenta el contenido de forma más intuitiva, permitiendo explorar mucho más sobre markdown.
+
+___
+
+## **3- NBA**
+
+### _3.1- Temporada 19/20_
+
+
+_A través de los datos podemos comprobar qúe parámetros caracterizan el juego moderno de la NBA y cuáles están más relacionados con los puntos anotados y las victorias._
+
+Con los datos proporcionados por [*NBAStuffer*](https://www.nbastuffer.com/2019-2020-nba-team-stats/) vamos a analizar qué parámetros influyen más en el juego actual. La tabla que tenemos (algunas filas y columnas) queda así:
+
+
+```{r, echo=FALSE,  results='hide',message=FALSE}
+#Importamos las librerías necesarias.
+
+library(rvest)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(shiny)
+library(knitr)
+library(kableExtra)
+
+#Importamos la primera tabla, de la temporada 19/20
+
+url <- 'https://www.nbastuffer.com/2019-2020-nba-team-stats/'
+tmp <- read_html(url)
+tmp <- html_nodes(tmp, "table")
+tabla <- html_table(tmp[[1]])
+
+#Le damos formato:
+
+tabla$RANK <- NULL
+colnames(tabla)[c(5:23)]<-c('PTS','aPTS','Dif_PTS','PACE','OFF_100_posesiones','DEF_100_posesiones', 'DIFF_100_posesiones','SoS','rSoS','SAR','CONS', '4AF','W','L','PorWIN','eWIN', 'pWin', 'ACH', 'STR')
+tabla_nba <- tabla[order(tabla$PTS),]
+tabla_nba$Temp <- rep('19/20', 30)
+
+#Ahora, formamos la tabla de la temporada 2008/2009, de forma similar a la anterior:
+
+
+url3 <- 'https://www.nbastuffer.com/2008-2009-nba-regular-season-advanced-stats/'
+tmp <- read_html(url3)
+tmp <- html_nodes(tmp, "table")
+tabla0809 <- html_table(tmp[[1]])
+tabla0809 <- tabla0809[3:32,]
+colnames(tabla0809)[c(1:19)] = c('Rank','Team','Conf_Div', 'GP','PTS','aPTS','Dif_PTS','PACE','OFF_100_posesiones','DEF_100_posesiones', 'DIFF_100_posesiones','CONS','W','L','PorWIN','eWIN', 'ACH', 'Att','F')
+tabla0809$Rank <- NULL
+tabla0809[,3:18]<-sapply(tabla0809[,3:18],as.numeric)
+tabla0809$Temp <- rep('08/09', 30)
+
+#Ahora la tabla de la temporada 2012/2013:
+
+url4 <- 'https://www.nbastuffer.com/2012-2013-nba-regular-season-advanced-stats/'
+tmp <- read_html(url4)
+tmp <- html_nodes(tmp, "table")
+tabla1213 <- html_table(tmp[[1]])
+tabla1213[,1:3] <- NULL
+tabla1213 <- tabla1213[5:34,]
+colnames(tabla1213)[c(1:19)] = c('Conf_Div', 'GP','PTS','aPTS','Dif_PTS','PACE','OFF_100_posesiones','DEF_100_posesiones', 'DIFF_100_posesiones','SOS','SAR','CONS','A4F','W','L','PorWIN','pWIN','eWIN', 'ACH')
+tabla1213[,3:18]<-sapply(tabla1213[,3:18],as.numeric)
+tabla1213$Temp <- rep('12/13', 30)
+
+#Ahora la tabla de la temporada 2016/2017:
+
+url5 <- 'https://www.nbastuffer.com/2016-2017-nba-regular-season-advanced-stats/'
+tmp <- read_html(url5)
+tmp <- html_nodes(tmp, "table")
+tabla1617 <- html_table(tmp[[1]])
+tabla1617[,1:3] <- NULL
+tabla1617 <- tabla1617[5:34,]
+colnames(tabla1617)[c(1:20)] = c('Conf_Div', 'GP','PTS','aPTS','Dif_PTS','PACE','OFF_100_posesiones','DEF_100_posesiones', 'DIFF_100_posesiones','SOS','RSoS','SAR','CONS','A4F','W','L','PorWIN','pWIN','eWIN', 'ACH')
+tabla1617[,3:18]<-sapply(tabla1617[,3:18],as.numeric)
+tabla1617$Temp <- rep('16/17', 30)
+
+#Unimos las columnas que vamos a usar en una tabla:
+
+tabla_comparativa <- rbind(tabla0809[,c(4,7,14,19)], tabla1213[,c(3,6,16,20)], tabla1617[,c(3,6,17,21)], tabla_nba[,c(5,8,19,24)])
+
+```
+```{r, echo=FALSE,message=FALSE}
+#Representamos algunas filas y columnas de la tabla.
+
+kable(tabla_nba[1:7,1:10],row.names= FALSE)%>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+
+La **primera** figura, presenta los puntos por partido (_PTS_) frente al ritmo (_PACE_), que es el número estimado de posesiones que tiene un equipo por 48 minutos de juego. El color de los puntos viene determinado por el porcentaje de victoria (_PorWIN_).
+Se observa que está relacionado y a mayor número de posesiones, mayor número de puntos, lo cual es lógico, ya que a mayor número de posesiones más oportunidades para tirar a canasta. También vemos que el porcentaje de victoria no muestra una relación clara ni con los puntos ni con el ritmo.
+
+
+\
+
+```{r, fig.align='center',echo=FALSE}
+#La primera gráfica.
+
+p1 <- ggplot(tabla_nba, aes(x = PTS, y= PACE)) + geom_point(aes(color = PorWIN),size=5)+scale_color_gradient(low = "blue", high = "red") + geom_smooth(method = 'loess', color = 'blue', fill= 'lightblue')+ggtitle("PTS vs. PACE")+theme(plot.title = element_text(hjust = 0.5),plot.background = element_rect(fill = "grey"),panel.background = element_rect(fill = "white"),panel.grid.major = element_line(size = 0.35, linetype = 'solid',
+colour = "grey10"),panel.grid.minor = element_line(size = 0.15, linetype = 'solid',colour = "grey"))
+
+p1
+```
+
+\
+
+Tras comprobar que cuanto mayor _"ritmo"_ tiene un equipo, más puntos anota, nos preguntamos ¿llevar un ritmo tan alto va asociado a recibir más puntos por partido? En la **segunda** figura se representan los puntos recibidos por partido (_aPTS_) frente al ritmo (_PACE_), divididos por conferencias. El tamaño de los puntos viene determinado por el porcentaje de victoria (_PorWIN_).
+Si miramos la gráfica observamos que tambien está relacionado. Esto puede deberse a que si tu equipo tiene muchas posesiones (lo que implica posesiones cortas) el rival también tendrá más posesiones, y por tanto, más oportunidades de tirar a canasta. En cuanto al porcentaje de victoria, se observa que en el "primer" cuadrante (bajo _aPTS_ y bajo *PACE*) se acumulan porcentajes de victoria mayores, aunque hay algunos puntos sueltos en la parte superior.
+
+\
+
+```{r, fig.align='center',echo=FALSE}
+#La segunda gráfica.
+
+p2 <- ggplot(tabla_nba, aes(x = aPTS, y= PACE)) + geom_point(aes( size= PorWIN)) + geom_smooth(method = 'loess', color = 'blue', fill= 'lightblue')+ggtitle("aPTS vs. PACE")+theme(plot.title = element_text(hjust = 0.5),plot.background = element_rect(fill = "grey"),panel.background = element_rect(fill = "white"),panel.grid.major = element_line(size = 0.35, linetype = 'solid',
+colour = "grey10"),panel.grid.minor = element_line(size = 0.15, linetype = 'solid',colour = "grey")) + facet_grid(CONF ~.)
+
+p2
+
+```
+
+\
+
+### _3.2- Evolución del juego_
+
+\
+
+El ritmo de juego es uno de los aspectos que más ha variado en los últimos años. Una vez más, se presenta el ritmo frente a los puntos anotados por partido. La conclusión que nos deja la gráfica es que el aumento de ritmo y anotación se ha concentrado en las últimas temporadas, ya que entre 08/09 y 12/13 apenas varió.
+
+\
+
+```{r, fig.align='center',echo=FALSE,message=FALSE,warning=FALSE}
+#La tercera gráfica.
+
+p3 <-ggplot(tabla_comparativa, aes(PTS, PACE, color = Temp))+geom_point(size=2.5) + ggtitle("Evolución PTS vs. PACE")+theme_economist() + scale_fill_economist()+theme(plot.title = element_text(hjust = 0.5))
+p3
+```
+
+\
+
+Por último, se adjunta un gráfico interactivo para apreciar la evolución, donde el tamaño de los puntos viene dado por el porcentaje de victoria.
+
+\
+
+```{r, fig.align='center',echo=FALSE,message=FALSE,warning=FALSE}
+#La gráfica interactiva.
+
+p4<-plot_ly(tabla_comparativa, x = ~PTS, y = ~PACE, type = 'scatter', mode = 'markers', color =  ~Temp, frame = ~Temp, size = ~PorWIN)%>% layout(title = "Comparativa interactiva", showlegend = FALSE)
+p4 <- p4 %>% 
+  animation_opts(
+    1500, easing = "quad", redraw = T)
+
+  
+div(p4, align = 'right')
+
+```
+
+
+
